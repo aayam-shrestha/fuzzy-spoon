@@ -1,29 +1,53 @@
-# Simple pygame program
+import os, sys, math, pygame, pygame.mixer
+from pygame.locals import *
 
-# Import and initialize the pygame library
-import pygame
-pygame.init()
+black = (0,0,0)
+red = (255,0,0)
+green = (0,255,0)
+blue = (0,0,255)
+white = (255,255,255)
+run_me = True
 
-# Set up the drawing window
-screen = pygame.display.set_mode([500, 500])
+screen_size = screen_width, screen_height = 1000, 500
+screen = pygame.display.set_mode(screen_size)
+pygame.display.set_caption('platformer')
 
-# Run until the user asks to quit
-running = True
-while running:
+window = pygame.display.set_mode((1000,500))
+clock = pygame.time.Clock()
+fps_limit = 60
 
-    # Did the user click the window close button?
+picture = pygame.image.load('download.png')
+bg = pygame.image.load('tree.png')
+
+##bg = pygame.transform.scale(bg, screen_size)
+
+posx = 300
+posy = 200
+
+while run_me:
+    clock.tick(fps_limit) 
+
+    window.blit(bg, (0,0))
     for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-
-    # Fill the background with white
-    screen.fill((255, 255, 255))
-
-    # Draw a solid blue circle in the center
-    pygame.draw.circle(screen, (0, 0, 255), (250, 250), 75)
-
-    # Flip the display
+        if event.type == QUIT:
+            run_me = False
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_LEFT:
+                posx = posx - 10
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_RIGHT:
+                posx = posx + 10
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_UP:
+                posy = posy - 10
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_DOWN:
+                posy = posy + 10
+                
+    screen.blit(picture, (posx, posy))
+    pygame.display.update()
     pygame.display.flip()
 
-# Done! Time to quit.
+    
+
 pygame.quit()
