@@ -1,7 +1,7 @@
 
 import os, sys, math, pygame, pygame.mixer
 from pygame.locals import *
-from platforms import Platform
+from platforms import Platform, Hazard
 
 class Game:
       
@@ -18,7 +18,7 @@ class Game:
         self.fps_limit = 60
         
         #import Background
-        self.bg = pygame.image.load('Forest_Level.png')
+        self.bg = pygame.image.load('Game_bg.png')
         self.bg = pygame.transform.scale(self.bg, (width, height))
         
         #import Character Image
@@ -30,7 +30,10 @@ class Game:
         #Flip Character Image
         self.flipped_char = pygame.transform.flip(self.character, True, False)
     
-        self.p1 = Platform(self.screen)
+        self.p = Platform(self.screen)
+        self.h = Hazard(self.screen)
+#         self.c = Coin(self.screen)
+
 
     #Draw Character Facing Right
     def draw_right(self,ferret):
@@ -43,13 +46,28 @@ class Game:
         pygame.display.update()
   
     def check_collisions(self, ferret):
-        item = self.p1.collisions(ferret)
+        
+        item = self.p.collisions(ferret)
         if item:
             if self.isJump == True and ferret.y < item.y:
                 ferret.bottom = item.top
             if self.isJump == False and ferret.y > item.y and ferret.right > item.left and ferret.y + 100 > item.y + 100:
                 ferret.right = item.left
-    
+        
+        hazard = self.h.collisions(ferret)
+        if hazard or (ferret.bottom == self.height):
+            gameover = pygame.font.SysFont('Calibri', 120)
+            text = gameover.render("Game Over!", True, (255,0,0))
+            self.screen.blit(text, (550, 500))
+            pygame.display.flip()
+            pygame.time.wait(3000)
+            sys.exit()
+            
+#         coin = self.c.collisions(ferret)
+
+
+
+
     def pos_check(self, ferret, lvl0):
         for item in lvl0:
            # print(ferret.bottom, item.top)
@@ -69,8 +87,8 @@ class Game:
         v = 9
         airtime = 0
         ferret = pygame.Rect(100, 675, self.character_width, self.character_height) #makes image an object
-        lvl0=[]
-        for item in self.p1.platf:
+        self.lvl0=[]
+        for item in self.p.platf:
             lvl0.append(pygame.Rect(item))
         #Character Facing Movement Direction
         character_is_right = True
@@ -79,8 +97,9 @@ class Game:
             clock.tick(self.fps_limit)
 
             self.win.blit(self.bg, (0,0))
-            self.p1.draw(self.screen, "black")
-
+            self.p.draw(self.screen, "black")
+            self.h.draw(self.screen, "red")
+            
             self.check_collisions(ferret)
 
            #Exit game
@@ -122,7 +141,6 @@ class Game:
                 else:
                     airtime += 1
                     drop_dist =  min(platform_dist, (1/2) * (airtime**2))
-                    print(drop_dist)
                     ferret.y += drop_dist
             #Boundaries
             if ferret.x < 0:
@@ -143,30 +161,30 @@ class Game:
         pygame.quit()
 
 
-class Hazard:
-   
-    def __init__(self, screen):
-#         self.posx = pos[0]
-#         self.posy = pos[1]
-        self.hazard_pos = [[670,320], [700, 500]]
-        h_rect = []
-        self.color = (100, 100, 100)
-        self.screen = screen
-       
-    def draw(self):
-       
-        for i in self.hazard_pos:
-            h_rect.append(pygame.Rect(i[0] - 30, i[1], 60, 50))
-            pygame.draw.polygon(surface= self.screen, color=self.color, points=[(self.posx - 30, self.posy + 50), (self.posx,self.posy), (self.posx+ 30, self.posy + 50)])
-       
-        pygame.display.flip()
-       
-    def collisions(self,ferret, item):
-        collide = pygame.Rect.colliderect(ferret, item)
-        if collide:
-            if self.isJump == True and ferret.y < item.y:
-                ferret.bottom = item.top
-            if self.isJump == False and ferret.y > item.y and ferret.right > item.left and ferret.y + 100 > item.y + 100:
-                ferret.right = item.left
 
-###Make a charcter class and check hit between character and r
+
+class Button:
+    def __init__(self, pos, text_input,font, base_color, hovering_color):
+
+        self.x_pos = pos[0]
+        self.y_pos = pos[1]
+        self.font = font
+        self.base_color, self.hovering_color = base_color, hovering_color
+        self.text_input = text_input
+        self.text = self.font.render(self.text_input, True, self.base_color)
+        self.rect = self.text.get_rect(center=(self.x_pos, self.y_pos))
+        self.text_rect = self.text.get_rect(center=(self.x_pos, self.y_pos))
+
+    def update(self, screen):
+        screen.blit(self.text, self.text_rect)
+
+    def checkForInput(self, position):
+        if position[0] in range(self.rect.left, self.rect.right) and position[1] in range(self.rect.top, self.rect.bottom):
+            return True
+        return False
+
+    def changeColor(self, position):
+        if position[0] in range(self.rect.left, self.rect.right) and position[1] in range(self.rect.top, self.rect.bottom):
+            self.text = self.font.render(self.text_input, True, self.hovering_color)
+        else:
+            self.text = self.font.render(self.text_input, True, self.base_color)
