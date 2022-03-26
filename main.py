@@ -32,19 +32,16 @@ while run_me:
         if event.type == QUIT:
             run_me = False
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_LEFT:
-                posx = posx - 10
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_RIGHT:
-                posx = posx + 10
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_UP:
-                posy = posy - 10
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_DOWN:
-                posy = posy + 10
+            print(pygame.key.name(event.key))
+    keys = pygame.key.get_pressed()
+            
+    posx += (keys[pygame.K_RIGHT] - keys[pygame.K_LEFT]) * 10
+    posy += (keys[pygame.K_DOWN] - keys[pygame.K_UP]) * 10
+    
+    posx = posx % window.get_width()
+    posy = posy % window.get_height()
                 
-    screen.blit(picture, (posx, posy))
+    screen.bli t(picture, (posx, posy))
     pygame.display.update()
     pygame.display.flip()
 
